@@ -3,7 +3,7 @@
 #include "opcode.h"
 
 int main(void) {
-	printf("%04x rofl\n", (0xA2EA & 0xF000) >> 12);
+	printf("%d rofl\n", (0x8000 >> 15));
 	printf("initializing chip8 emulator...");
 	initialize_chip8();	
 	load_rom();

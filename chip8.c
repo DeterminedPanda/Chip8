@@ -8,6 +8,7 @@
 unsigned char memory[MEMORY_SIZE];
 unsigned short opcode;
 unsigned short pc;
+unsigned char V[16];
 
 void initialize_chip8(void) {
 	pc = ROM_SP;

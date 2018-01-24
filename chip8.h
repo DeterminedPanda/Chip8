@@ -4,3 +4,5 @@ void emulate_cycle(void);
 void fetch_opcode(void);
 
 extern unsigned short opcode;
+extern unsigned char V[16];
+extern unsigned short pc;	
