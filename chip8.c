@@ -6,9 +6,12 @@
 #define ROM_SP 0x200 //the rom starting point in memory
 
 unsigned char memory[MEMORY_SIZE];
-unsigned short opcode;
-unsigned short pc;
-unsigned char V[16];
+extern unsigned short opcode;
+extern unsigned short pc;
+extern unsigned char V[16];
+extern unsigned short I;
+extern unsigned short stack[16];
+extern unsigned short sp;
 
 unsigned char chip8_fontset[80] =
 { 
@@ -58,5 +61,4 @@ void emulate_cycle(void) {
 
 void fetch_opcode(void) {
 	opcode = memory[pc] << 8 | memory[pc + 1];
-	pc += 2;
 }

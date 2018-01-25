@@ -12,6 +12,7 @@ void (*chip8_table[16])(void) =
 //TODO name 
 //all opcodes that start with 0 are evaluated here
 void cpu_0(void) {
+	printf("0");
 	unsigned short tail = opcode & 0x0FFF; 
 
 	switch(tail) {
@@ -32,6 +33,7 @@ void cpu_0(void) {
 //TODO name
 //Jumps to address NNN.
 void cpu_1(void) {
+	printf("1");
 	unsigned short NNN = opcode & 0x0FFF;
 	pc = NNN;
 }
@@ -39,6 +41,7 @@ void cpu_1(void) {
 //TODO name
 //Calls subroutine at NNN.
 void cpu_2(void) {
+	printf("2");
 	sp++;
 	stack[sp] = pc;
 	unsigned short NNN = opcode & 0x0FFF;
@@ -48,6 +51,7 @@ void cpu_2(void) {
 //TODO name
 //Skips the next instruction if VX equals NN.
 void cpu_3(void) {
+	printf("3");
 	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char NN = opcode & 0x00FF;
 
@@ -61,6 +65,7 @@ void cpu_3(void) {
 //TODO name
 //Skips the next instruction if VX doesn't equal NN.
 void cpu_4(void) {
+	printf("4");
 	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char NN = opcode & 0x00FF;
 
@@ -75,6 +80,7 @@ void cpu_4(void) {
 //TODO name
 //Skips the next instruction if VX equals VY.
 void cpu_5(void) {
+	printf("5");
 	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char y = (opcode & 0x00F0) >> 4;
 
@@ -88,6 +94,7 @@ void cpu_5(void) {
 //TODO name
 //Sets VX to NN
 void cpu_6(void) {
+	printf("6");
 	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char NN = opcode & 0x00FF;
 
@@ -98,6 +105,7 @@ void cpu_6(void) {
 //TODO name
 //Adds NN to VX.
 void cpu_7(void) {
+	printf("7");
 	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char NN = opcode & 0x00FF;
 
@@ -107,6 +115,7 @@ void cpu_7(void) {
 
 //all opcodes that start with 8 are evaluated here
 void cpu_arithmetic(void) {
+	printf("8");
 	int tail = opcode & 0x0000F;
 	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char y = (opcode & 0x00F0) >> 4;
@@ -158,6 +167,7 @@ void cpu_arithmetic(void) {
 //TODO name
 //Skips the next instruction if VX doesn't equal VY. 
 void cpu_9(void) {
+	printf("9");
 	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char y = (opcode & 0x00F0) >> 4;
 
@@ -171,14 +181,17 @@ void cpu_9(void) {
 //TODO name
 //Sets I to the address NNN.
 void cpu_a(void) {
+	printf("10");
 	unsigned char NNN = opcode & 0x0FFF;
 
 	I = NNN;
+	pc += 2;
 }
 
 //TODO name
 //Jumps to the address NNN plus V0.
 void cpu_b(void) {
+	printf("11");
 	unsigned char NNN = opcode & 0x0FFF;
 
 	pc = V[0] + NNN;
@@ -187,6 +200,7 @@ void cpu_b(void) {
 //TODO name
 //Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
 void cpu_c(void) {
+	printf("12");
 	unsigned short x = (opcode & 0x0F00) >> 8;
 	unsigned short NN = opcode & 0x00FF;
 	unsigned short random_number = rand() % 256;
@@ -195,19 +209,22 @@ void cpu_c(void) {
 }
 
 //TODO name
-//all opcodes that start with d are evaluated here
+/*Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen*/
 void cpu_d(void) {
-
+	printf("13");
+	unsigned char x = (opcode & 0x0F00) >> 8;
+	unsigned char y = (opcode & 0x00F0) >> 4;
+	unsigned char N = opcode & 0x000F;
 }
 
 //TODO name
 //all opcodes that start with e are evaluated here
 void cpu_e(void) {
-
+	printf("14");
 }
 
 //TODO name
 //all opcodes that start with f are evaluated here
 void cpu_f(void) {
-
+	printf("15");
 }
