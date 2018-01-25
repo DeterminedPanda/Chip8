@@ -38,7 +38,15 @@ void cpu_2(void) {
 //TODO name
 //all opcodes that start with 3 are evaluated here
 void cpu_3(void) {
+	//Skips the next instruction if VX equals NN.
+	unsigned char x = (opcode & 0x0F00) >> 8;
+	unsigned char nn = opcode & 0x00FF;
 
+	if(V[x] == nn) {
+		pc += 4;
+	} else {
+		pc += 2;
+	}
 }
 
 //TODO name
@@ -118,18 +126,14 @@ void cpu_arithmetic(void) {
 //TODO name
 //all opcodes that start with 9 are evaluated here
 void cpu_9(void) {
-	unsigned char tail = opcode & 0x000F;
 	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char y = (opcode & 0x00F0) >> 4;
 
-	switch(tail) {
-		case 0: //Skips the next instruction if VX doesn't equal VY. 
-			if(V[x] != V[y]) {
-				pc += 4;
-			} else {
-				pc+= 2;
-			}
-			break;
+	//Skips the next instruction if VX doesn't equal VY. 
+	if(V[x] != V[y]) {
+		pc += 4;
+	} else {
+		pc+= 2;
 	}
 }
 
