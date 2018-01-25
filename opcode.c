@@ -15,9 +15,10 @@ void cpu_0(void) {
 }
 
 //TODO name
-//all opcodes that start with 1 are evaluated here
+//Jumps to address NNN.
 void cpu_1(void) {
-
+	unsigned short NNN = opcode & 0x0FFF;
+	pc = NNN;
 }
 
 //TODO name
@@ -160,9 +161,9 @@ void cpu_a(void) {
 //TODO name
 //Jumps to the address NNN plus V0.
 void cpu_b(void) {
-unsigned char NNN = opcode & 0x0FFF;
+	unsigned char NNN = opcode & 0x0FFF;
 
-pc = V[0] + NNN;
+	pc = V[0] + NNN;
 }
 
 //todo name
