@@ -1,6 +1,7 @@
 #include "opcode.h"
 #include "chip8.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 void (*chip8_table[16])(void) = 
 {
@@ -11,7 +12,21 @@ void (*chip8_table[16])(void) =
 //TODO name 
 //all opcodes that start with 0 are evaluated here
 void cpu_0(void) {
+	unsigned short tail = opcode & 0x0FFF; 
 
+	switch(tail) {
+		case 0x00E0:
+			//TODO clear screen
+			break;
+		case 0x00EE: //returns from a subroutine.
+			pc = stack[sp];
+			sp--;
+			pc += 2;
+			break;
+		default:
+			//0x0NNN not necessary for most ROM_SP
+			break;
+	}
 }
 
 //TODO name
@@ -22,9 +37,12 @@ void cpu_1(void) {
 }
 
 //TODO name
-//all opcodes that start with 2 are evaluated here
+//Calls subroutine at NNN.
 void cpu_2(void) {
-
+	sp++;
+	stack[sp] = pc;
+	unsigned short NNN = opcode & 0x0FFF;
+	pc = NNN;
 }
 
 //TODO name
@@ -166,10 +184,14 @@ void cpu_b(void) {
 	pc = V[0] + NNN;
 }
 
-//todo name
-//all opcodes that start with c are evaluated here
+//TODO name
+//Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
 void cpu_c(void) {
-
+	unsigned short x = (opcode & 0x0F00) >> 8;
+	unsigned short NN = opcode & 0x00FF;
+	unsigned short random_number = rand() % 256;
+	V[x] = random_number & NN;	
+	pc += 2;
 }
 
 //TODO name
