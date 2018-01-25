@@ -2,20 +2,11 @@
 #include "chip8.h"
 #include <stdio.h>
 
-void execute_opcode(void) {
-	chip8_table[(opcode >> 12)]();
-}
-
-void (*chip8_table[17])(void) = 
+void (*chip8_table[16])(void) = 
 {
-	cpu_0      , cpu_1, cpu_2, cpu_3, cpu_4, cpu_5, cpu_6, cpu_7, 
-	cpu_arithmetic, cpu_9, cpu_a, cpu_b, cpu_c, cpu_d, cpu_e, cpu_f,
-	cpu_null
+	cpu_0, cpu_1, cpu_2, cpu_3, cpu_4, cpu_5, cpu_6, cpu_7, 
+	cpu_arithmetic, cpu_9, cpu_a, cpu_b, cpu_c, cpu_d, cpu_e, cpu_f
 };
-
-void cpu_null(void) {
-	printf("wtf %04x\n", opcode);
-}
 
 //TODO name 
 //all opcodes that start with 0 are evaluated here
@@ -38,10 +29,10 @@ void cpu_2(void) {
 //TODO name
 //Skips the next instruction if VX equals NN.
 void cpu_3(void) {
-unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char nn = opcode & 0x00FF;
+	unsigned char x = (opcode & 0x0F00) >> 8;
+	unsigned char NN = opcode & 0x00FF;
 
-	if(V[x] == nn) {
+	if(V[x] == NN) {
 		pc += 4;
 	} else {
 		pc += 2;
@@ -52,9 +43,9 @@ unsigned char x = (opcode & 0x0F00) >> 8;
 //Skips the next instruction if VX doesn't equal NN.
 void cpu_4(void) {
 	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char nn = opcode & 0x00FF;
+	unsigned char NN = opcode & 0x00FF;
 
-	if(V[x] != nn) {
+	if(V[x] != NN) {
 		pc += 4;
 	} else {
 		pc += 2;
@@ -79,15 +70,20 @@ void cpu_5(void) {
 //Sets VX to NN
 void cpu_6(void) {
 	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char nn = opcode & 0x00FF;
+	unsigned char NN = opcode & 0x00FF;
 
-	V[x] = nn;
+	V[x] = NN;
+	pc += 2;
 }
 
 //TODO name
-//all opcodes that start with 7 are evaluated here
+//Adds NN to VX.
 void cpu_7(void) {
+	unsigned char x = (opcode & 0x0F00) >> 8;
+	unsigned char NN = opcode & 0x00FF;
 
+	V[x] += NN;
+	pc += 2;
 }
 
 //all opcodes that start with 8 are evaluated here
@@ -141,12 +137,11 @@ void cpu_arithmetic(void) {
 }
 
 //TODO name
-//all opcodes that start with 9 are evaluated here
+//Skips the next instruction if VX doesn't equal VY. 
 void cpu_9(void) {
 	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char y = (opcode & 0x00F0) >> 4;
 
-	//Skips the next instruction if VX doesn't equal VY. 
 	if(V[x] != V[y]) {
 		pc += 4;
 	} else {
@@ -155,18 +150,20 @@ void cpu_9(void) {
 }
 
 //TODO name
-//all opcodes that start with a are evaluated here
+//Sets I to the address NNN.
 void cpu_a(void) {
+	unsigned char NNN = opcode & 0x0FFF;
 
+	i = NNN;
 }
 
-//TODO name
+//todo name
 //all opcodes that start with b are evaluated here
 void cpu_b(void) {
 
 }
 
-//TODO name
+//todo name
 //all opcodes that start with c are evaluated here
 void cpu_c(void) {
 

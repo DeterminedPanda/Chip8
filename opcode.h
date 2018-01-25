@@ -1,5 +1,4 @@
-void (*chip8_table[17])(void);
-void cpu_null(void);
+void (*chip8_table[16])(void);
 void cpu_0(void);
 void cpu_1(void);
 void cpu_2(void);
@@ -16,4 +15,3 @@ void cpu_c(void);
 void cpu_d(void);
 void cpu_e(void);
 void cpu_f(void);
-void execute_opcode(void);

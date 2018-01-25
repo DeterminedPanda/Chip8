@@ -20,8 +20,8 @@ void load_rom(void) {
 }
 
 void emulate_cycle(void) {
-	fetch_opcode();
-	execute_opcode();		
+	fetch_opcode(); //gets the next opcode
+	chip8_table[(opcode >> 12)](); //calls the opcodes corresponding function	
 }
 
 void fetch_opcode(void) {
