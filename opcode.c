@@ -154,13 +154,15 @@ void cpu_9(void) {
 void cpu_a(void) {
 	unsigned char NNN = opcode & 0x0FFF;
 
-	i = NNN;
+	I = NNN;
 }
 
-//todo name
-//all opcodes that start with b are evaluated here
+//TODO name
+//Jumps to the address NNN plus V0.
 void cpu_b(void) {
+unsigned char NNN = opcode & 0x0FFF;
 
+pc = V[0] + NNN;
 }
 
 //todo name
