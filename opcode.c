@@ -39,7 +39,7 @@ void cpu_2(void) {
 //all opcodes that start with 3 are evaluated here
 void cpu_3(void) {
 	//Skips the next instruction if VX equals NN.
-unsigned char x = (opcode & 0x0F00) >> 8;
+	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char nn = opcode & 0x00FF;
 
 	if(V[x] == nn) {
@@ -47,14 +47,13 @@ unsigned char x = (opcode & 0x0F00) >> 8;
 	} else {
 		pc += 2;
 	}
-
-	}
+}
 
 //TODO name
 //all opcodes that start with 4 are evaluated here
 void cpu_4(void) {
-//Skips the next instruction if VX doesn't equal NN.
-unsigned char x = (opcode & 0x0F00) >> 8;
+	//Skips the next instruction if VX doesn't equal NN.
+	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char nn = opcode & 0x00FF;
 
 	if(V[x] != nn) {
@@ -68,7 +67,15 @@ unsigned char x = (opcode & 0x0F00) >> 8;
 //TODO name
 //all opcodes that start with 5 are evaluated here
 void cpu_5(void) {
+	//Skips the next instruction if VX equals VY.
+	unsigned char x = (opcode & 0x0F00) >> 8;
+	unsigned char y = (opcode & 0x00F0) >> 4;
 
+	if(V[x] == V[y]) {
+		pc += 4;
+	} else {
+		pc += 2;
+	}
 }
 
 //TODO name
