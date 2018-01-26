@@ -1,5 +1,6 @@
 #include "opcode.h"
 #include "chip8.h"
+#include "display.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -16,16 +17,14 @@ void cpu_0(void) {
 	unsigned short tail = opcode & 0x0FFF; 
 
 	switch(tail) {
-		case 0x00E0:
-			//TODO clear screen
-			break;
-		case 0x00EE: //returns from a subroutine.
-			pc = stack[sp];
-			sp--;
+		case 0x00E0: //Clears the screen.
+			clear_screen();
 			pc += 2;
 			break;
-		default:
-			//0x0NNN not necessary for most ROM_SP
+		case 0x00EE: //returns from a subroutine.
+			sp--;
+			pc = stack[sp];
+			pc += 2;
 			break;
 	}
 }
@@ -215,16 +214,49 @@ void cpu_d(void) {
 	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char y = (opcode & 0x00F0) >> 4;
 	unsigned char N = opcode & 0x000F;
+
+	draw(V[x], V[y], N);
+
+	pc += 2;
 }
 
 //TODO name
 //all opcodes that start with e are evaluated here
 void cpu_e(void) {
 	printf("14");
+	pc += 2;
 }
 
 //TODO name
 //all opcodes that start with f are evaluated here
 void cpu_f(void) {
 	printf("15");
+	int tail = opcode & 0x00FF;
+	unsigned char x = (opcode & 0x0F00) >> 8; 
+	switch(tail) {
+		case 0x0007:
+			V[x] = delay_timer;
+			break;
+		case 0x000A:
+			break;
+		case 0x0015:
+			delay_timer = V[x];
+			break;
+		case 0x0018:
+			sound_timer = V[x];
+			break;
+		case 0x001E:
+			I += V[x];
+			break;
+		case 0x0029:
+			I = chip8_fontset[V[x]];
+			break;
+		case 0x0033:
+			break;
+		case 0x0055:
+			break;
+		case 0x0065:
+			break;
+	}
+	pc += 2;
 }
