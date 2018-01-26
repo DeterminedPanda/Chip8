@@ -1,10 +1,13 @@
 #include "chip8.h"
 #include "opcode.h"
 #include <stdio.h>
+#include "display.h"
+#include <unistd.h>
 
 #define MEMORY_SIZE 4096
 #define ROM_SP 0x200 //the rom starting point in memory
 
+extern unsigned char memory[MEMORY_SIZE];
 extern unsigned short opcode;
 extern unsigned short pc;
 extern unsigned char V[16];
@@ -13,7 +16,7 @@ extern unsigned short stack[16];
 extern unsigned short sp;
 extern unsigned char delay_timer;
 extern unsigned char sound_timer;
-unsigned char memory[MEMORY_SIZE];
+extern unsigned char draw_flag;
 
 unsigned char chip8_fontset[80] =
 { 
@@ -42,6 +45,7 @@ void initialize_chip8(void) {
 	sp = 0;
 	delay_timer = 0;
 	sound_timer = 0;
+	draw_flag = 0;
 	load_font();
 	load_rom();
 }
@@ -58,18 +62,21 @@ void load_rom(void) {
 }
 
 void emulate_cycle(void) {
-	fetch_opcode(); //gets the next opcode
-	chip8_table[(opcode >> 12)](); //calls the opcodes corresponding function	
+	for(;;) {
+		fetch_opcode(); //gets the next opcode
+		chip8_table[(opcode >> 12)](); //calls the opcodes corresponding function	
 
-	if(delay_timer > 0) {
-		delay_timer--;
-	}
-
-	if(sound_timer > 0) {
-		if(sound_timer == 1) {
-			printf("sound timer equals 1\n");
+		if(delay_timer > 0) {
+			delay_timer--;
 		}
-		sound_timer--;
+
+		if(sound_timer > 0) {
+			if(sound_timer == 1) {
+				printf("sound timer equals 1\n");
+			}
+			sound_timer--;
+		}
+		sleep(1);
 	}
 }
 

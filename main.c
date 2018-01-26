@@ -6,11 +6,7 @@
 int main(void) {
 	initialize_chip8();	
 	create_window();
-	for(;;) {
-		emulate_cycle();
-		printf(" - %04x ...\n", opcode);
-	}
-
+	emulate_cycle();
 	destroy_window();
 	return 0;
 }	

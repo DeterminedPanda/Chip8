@@ -17,8 +17,8 @@ void create_window() {
 }
 
 //TODO finish this function
-//Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen
 void draw(unsigned char x, unsigned char y, unsigned int N) { 
+	printf("drawing\n");
 	for(int height = 0; height < N; height++) {
 		for(int width = 0; width < 8; width++) {
 			SDL_RenderDrawPoint(renderer, x + width, y + height);
