@@ -14,4 +14,5 @@ unsigned short stack[16];
 unsigned short sp;
 unsigned char delay_timer;
 unsigned char sound_timer;
-unsigned char draw_flag;
+unsigned char gfx[64 * 32];
+unsigned int draw_flag;
