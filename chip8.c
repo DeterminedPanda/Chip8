@@ -99,7 +99,6 @@ void emulate_cycle(void) {
 		// Process SDL events
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) exit(0);
 
             // Process keydown events
             if (e.type == SDL_KEYDOWN) {
