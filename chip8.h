@@ -16,3 +16,4 @@ unsigned char delay_timer;
 unsigned char sound_timer;
 unsigned char gfx[64 * 32];
 unsigned int draw_flag;
+unsigned char key[16];

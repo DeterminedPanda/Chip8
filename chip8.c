@@ -18,6 +18,7 @@ extern unsigned char delay_timer;
 extern unsigned char sound_timer;
 extern unsigned char gfx[64 * 32];
 extern unsigned int draw_flag;
+extern unsigned char keys[16];
 
 unsigned char chip8_fontset[80] =
 { 
@@ -60,17 +61,27 @@ void load_font(void) {
 void load_rom(void) {
 	FILE *game = fopen("Pong.ch8", "rb");
 	fread(memory + ROM_SP, 1, MEMORY_SIZE - ROM_SP, game);
-	/*V[0] = 0;*/
-	/*V[1] = 0;*/
-	/*memory[0x200 + 0] = 0xD0;*/
-	/*memory[0x200 + 1] = 0x15;*/
-	/*memory[0x200 + 2] = 0xA0;*/
-	/*memory[0x200 + 3] = 0x00;*/
-	/*memory[0x200 + 4] = 0x61;*/
-	/*memory[0x200 + 5] = 0x25;*/
-	/*memory[0x200 + 6] = 0xD1;*/
-	/*memory[0x200 + 7] = 0x25;*/
 }
+
+unsigned char keymap[16] = {
+	SDLK_1,
+	SDLK_2,
+	SDLK_3,
+	SDLK_4,
+	SDLK_q,
+	SDLK_w,
+	SDLK_e,
+	SDLK_r,
+	SDLK_a,
+	SDLK_s,
+	SDLK_d,
+	SDLK_f,
+	SDLK_z,
+	SDLK_x,
+	SDLK_c,
+	SDLK_v
+};
+
 
 void emulate_cycle(void) {
 	while(1) {
@@ -83,6 +94,33 @@ void emulate_cycle(void) {
 
 		if(sound_timer > 0) {
 			sound_timer--;
+		}
+
+		// Process SDL events
+        SDL_Event e;
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) exit(0);
+
+            // Process keydown events
+            if (e.type == SDL_KEYDOWN) {
+                if (e.key.keysym.sym == SDLK_ESCAPE)
+                    exit(0);
+
+
+                for (int i = 0; i < 16; ++i) {
+                    if (e.key.keysym.sym == keymap[i]) {
+                        key[i] = 1;
+                    }
+                }
+            }
+            // Process keyup events
+            if (e.type == SDL_KEYUP) {
+                for (int i = 0; i < 16; ++i) {
+                    if (e.key.keysym.sym == keymap[i]) {
+                        key[i] = 0;
+                    }
+                }
+            }
 		}
 
 		if(draw_flag == 1) {

@@ -2,8 +2,8 @@
 #include "display.h"
 #include <stdio.h>
 
-#define WINDOW_WIDTH 1024	 
-#define WINDOW_HEIGHT 512
+#define WINDOW_WIDTH 640	 
+#define WINDOW_HEIGHT 320 
 #define WINDOW_NAME "Chip8 Emulator"
 #define W 64
 #define H 32

@@ -1,6 +1,7 @@
 #include "opcode.h"
 #include "chip8.h"
 #include "display.h"
+#include "SDL2/SDL.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -26,6 +27,7 @@ void cpu_0(void) {
 			pc = stack[sp];
 			break;
 		default:
+			printf("RCA is not implemented, exiting...\n");
 			//exit(1);
 			break;
 	}
@@ -147,7 +149,7 @@ void cpu_arithmetic(void) {
 			break;
 		case(0x0006): //Shifts VY right by one and copies the result to VX. VF is set to the value of the least significant bit of VY before the shift.
 			V[15] = V[y] & 0x1; //get least significant bit
-			V[x] = V[x] >> 1;
+			V[x] = V[y] >> 1;
 			break;
 		case(0x0007): //Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
 			if(V[x] > V[y]) {
@@ -158,7 +160,7 @@ void cpu_arithmetic(void) {
 			V[x] = V[y] - V[x];
 			break;
 		case(0x000E): //Shifts VY left by one and copies the result to VX. VF is set to the value of the most significant bit of VY before the shift 
-			V[15] = (V[x]) >> 7; //get most significant bit
+			V[15] = (V[y]) >> 3; //get most significant bit
 			V[x] = V[y] << 1;
 			break;
 	}
@@ -208,8 +210,8 @@ void cpu_c(void) {
 /*Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen*/
 void cpu_d(void) {
 	printf("13 - %04x\n", opcode);
-	unsigned char x = V[(opcode & 0x0F00) >> 8];
-	unsigned char y = V[(opcode & 0x00F0) >> 4];
+	unsigned char x = (opcode & 0x0F00) >> 8;
+	unsigned char y = (opcode & 0x00F0) >> 4;
 	unsigned char N = opcode & 0x000F;
 	unsigned short pixel;
 
@@ -218,10 +220,10 @@ void cpu_d(void) {
 		pixel = memory[I + yline];
 		for(int xline = 0; xline < 8; xline++) {
 			if((pixel & (0x80 >> xline)) != 0) {
-				if(gfx[(x + xline + ((y + yline) * 64))] == 1) {
+				if(gfx[(V[x] + xline + ((V[y] + yline) * 64))] == 1) {
 					V[15] = 1;
 				}
-				gfx[x + xline + ((y + yline) * 64)] ^= 1;
+				gfx[V[x] + xline + ((V[y] + yline) * 64)] ^= 1;
 			}
 		}
 	}
@@ -232,15 +234,25 @@ void cpu_d(void) {
 
 //all opcodes that start with e are evaluated here
 void cpu_e(void) {
-	printf("14 - %04x not implemented yet\n", opcode);
+	printf("14 - %04x\n", opcode);
+	unsigned char x = (opcode & 0x0F00) >> 8;
 	unsigned char tail = opcode & 0x00FF;
 
 	switch(tail) {
-		case 0x009E:
-			pc += 2;
+		case 0x009E: //Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block)
+			if(key[V[x]] != 0) {
+				pc += 4;
+			} else {
+				pc += 2;
+			}
 			break;
-		case 0x00A1:
-			pc += 4;
+		case 0x00A1: //Skips the next instruction if the key stored in VX isn't pressed. (Usually the next instruction is a jump to skip a code block)
+			if(key[V[x]] == 0) {
+				pc += 4;
+			}
+			else {
+				pc += 2;
+			}
 			break;
 	}
 }
@@ -250,13 +262,23 @@ void cpu_f(void) {
 	printf("15 - %04x\n", opcode);
 	int tail = opcode & 0x00FF;
 	unsigned char x = (opcode & 0x0F00) >> 8; 
+	int key_pressed = 0;
 
 	switch(tail) {
 		case 0x0007: //Sets VX to the value of the delay timer.
 			V[x] = delay_timer;
 			break;
 		case 0x000A:
-			printf("0x000A not implemented yet!!!!!!!!!!!!!!!\n");
+			for(int i = 0; i < 16; i++) {
+				if(key[i] != 0) {
+					V[x] = i;
+					key_pressed = 1;
+				}
+			}
+			if(!key_pressed) {
+				printf("rewind...\n");
+				return;
+			}
 			break;
 		case 0x0015: //Sets the delay timer to VX.
 			delay_timer = V[x];
@@ -278,14 +300,14 @@ void cpu_f(void) {
 		case 0x0055: //Stores V0 to VX (including VX) in memory starting at address I. I is increased by 1 for each value written.
 			for(int i = 0; i <= x; i++) {
 				memory[I + i] = V[i];
-				I++;
 			}
+			I += x + 1;
 			break;
 		case 0x0065: //Fills V0 to VX (including VX) with values from memory starting at address I. I is increased by 1 for each value written.
 			for(int i = 0; i <= x; i++) {
 				V[i] = memory[I + i];
-				I++;
 			}
+			I += x + 1;
 			break;
 	}
 	pc += 2;
