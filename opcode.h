@@ -1,17 +1,19 @@
-void (*chip8_table[16])(void);
-void cpu_0(void);
-void cpu_1(void);
-void cpu_2(void);
-void cpu_3(void);
-void cpu_4(void);
-void cpu_5(void);
-void cpu_6(void);
-void cpu_7(void);
-void cpu_arithmetic(void);
-void cpu_9(void);
-void cpu_a(void);
-void cpu_b(void);
-void cpu_c(void);
-void cpu_d(void);
-void cpu_e(void);
-void cpu_f(void);
+#include "chip8.h"
+
+void (*chip8_table[16])();
+void cpu_0(struct Chip8 *chip);
+void cpu_1(struct Chip8 *chip);
+void cpu_2(struct Chip8 *chip);
+void cpu_3(struct Chip8 *chip);
+void cpu_4(struct Chip8 *chip);
+void cpu_5(struct Chip8 *chip);
+void cpu_6(struct Chip8 *chip);
+void cpu_7(struct Chip8 *chip);
+void cpu_8(struct Chip8 *chip);
+void cpu_9(struct Chip8 *chip);
+void cpu_a(struct Chip8 *chip);
+void cpu_b(struct Chip8 *chip);
+void cpu_c(struct Chip8 *chip);
+void cpu_d(struct Chip8 *chip);
+void cpu_e(struct Chip8 *chip);
+void cpu_f(struct Chip8 *chip);

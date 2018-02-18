@@ -1,24 +1,8 @@
-#include "chip8.h"
 #include "opcode.h"
 #include <stdio.h>
 #include "display.h"
 #include <unistd.h>
 
-#define MEMORY_SIZE 4096
-#define ROM_SP 0x200 //the rom starting point in memory
-
-extern unsigned char memory[MEMORY_SIZE];
-extern unsigned short opcode;
-extern unsigned short pc;
-extern unsigned char V[16];
-extern unsigned short I;
-extern unsigned short stack[16];
-extern unsigned short sp;
-extern unsigned char delay_timer;
-extern unsigned char sound_timer;
-extern unsigned char gfx[64 * 32];
-extern unsigned int draw_flag;
-extern unsigned char keys[16];
 
 unsigned char chip8_fontset[80] =
 { 
@@ -40,27 +24,53 @@ unsigned char chip8_fontset[80] =
 	0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-void initialize_chip8(void) {
-	pc = ROM_SP;
-	opcode = 0;
-	I = 0;
-	sp = 0;
-	delay_timer = 0;
-	sound_timer = 0;
-	draw_flag = 0;
-	load_font();
-	load_rom();
+void start_emulation(void) {
+	struct Chip8 chip;
+	initialize_chip(&chip);
+	load_font(&chip);
+	load_rom(&chip);
+	emulate_cycle(&chip);	
 }
 
-void load_font(void) {
-	for(int i = 0; i < 80; ++i) {
-		memory[i] = chip8_fontset[i]; 
+void initialize_chip(struct Chip8 *chip) {
+	chip->pc = ROM_SP;
+	chip->opcode = 0;
+	chip->I = 0;
+	chip->sp = 0;
+	chip->delay_timer = 0;
+	chip->sound_timer = 0;
+	chip->draw_flag = 0;
+
+	for(int i = 0; i < (64 * 32); i++) {
+		chip->gfx[i] = 0;
+	}
+
+	for(int i = 0; i < 16; i++) {
+		chip->V[i] = 0;
+		chip->stack[i] = 0;
+		chip->keys[i] = 0;
 	}
 }
 
-void load_rom(void) {
-	FILE *game = fopen("Pong.ch8", "rb");
-	fread(memory + ROM_SP, 1, MEMORY_SIZE - ROM_SP, game);
+void load_font(struct Chip8 *chip) {
+	for(int i = 0; i < 80; ++i) {
+		chip->memory[i] = chip8_fontset[i]; 
+	}
+}
+
+void load_rom(struct Chip8 *chip) {
+	/*FILE *game = fopen("Pong.ch8", "rb");*/
+	/*unsigned char buffer[MEMORY_SIZE]; //fread into struct delivers wrong output, so copy game into buffer first		*/
+	/*fread(buffer + ROM_SP, 1, MEMORY_SIZE - ROM_SP, game);*/
+
+	/*for(int i = 0; i < MEMORY_SIZE; i++) {*/
+		/*chip->memory[i] = buffer[i];*/
+	/*}*/
+
+	chip->V[0] = 0;
+	chip->V[1] = 0;
+	chip->memory[0x200 + 0] = 0xD0;
+	chip->memory[0x200 + 1] = 0x15;
 }
 
 unsigned char keymap[16] = {
@@ -83,52 +93,52 @@ unsigned char keymap[16] = {
 };
 
 
-void emulate_cycle(void) {
+void emulate_cycle(struct Chip8 *chip) {
 	while(1) {
-		fetch_opcode(); //gets the next opcode
-		chip8_table[(opcode >> 12)](); //calls the opcodes corresponding function	
+		fetch_opcode(chip); //gets the next opcode
+		chip8_table[(chip->opcode >> 12)](chip); //calls the opcodes corresponding function	
 
-		if(delay_timer > 0) {
-			delay_timer--;
+		if(chip->delay_timer > 0) {
+			chip->delay_timer--;
 		}
 
-		if(sound_timer > 0) {
-			sound_timer--;
+		if(chip->sound_timer > 0) {
+			chip->sound_timer--;
 		}
 
 		// Process SDL events
-        SDL_Event e;
-        while (SDL_PollEvent(&e)) {
+		SDL_Event e;
+		while (SDL_PollEvent(&e)) {
 
-            // Process keydown events
-            if (e.type == SDL_KEYDOWN) {
-                if (e.key.keysym.sym == SDLK_ESCAPE)
-                    exit(0);
+			// Process keydown events
+			if (e.type == SDL_KEYDOWN) {
+				if (e.key.keysym.sym == SDLK_ESCAPE)
+					exit(0);
 
 
-                for (int i = 0; i < 16; ++i) {
-                    if (e.key.keysym.sym == keymap[i]) {
-                        key[i] = 1;
-                    }
-                }
-            }
-            // Process keyup events
-            if (e.type == SDL_KEYUP) {
-                for (int i = 0; i < 16; ++i) {
-                    if (e.key.keysym.sym == keymap[i]) {
-                        key[i] = 0;
-                    }
-                }
-            }
+				for (int i = 0; i < 16; ++i) {
+					if (e.key.keysym.sym == keymap[i]) {
+						chip->keys[i] = 1;
+					}
+				}
+			}
+			// Process keyup events
+			if (e.type == SDL_KEYUP) {
+				for (int i = 0; i < 16; ++i) {
+					if (e.key.keysym.sym == keymap[i]) {
+						chip->keys[i] = 0;
+					}
+				}
+			}
 		}
 
-		if(draw_flag == 1) {
-			draw_flag = 0;
-			draw(gfx);
+		if(chip->draw_flag == 1) {
+			chip->draw_flag = 0;
+			draw(chip->gfx);
 		}
 	}
 }
 
-void fetch_opcode(void) {
-	opcode = memory[pc] << 8 | memory[pc + 1];
+void fetch_opcode(struct Chip8 *chip) {
+	chip->opcode = chip->memory[chip->pc] << 8 | chip->memory[chip->pc + 1];
 }

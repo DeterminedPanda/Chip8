@@ -1,277 +1,279 @@
 #include "opcode.h"
-#include "chip8.h"
 #include "display.h"
 #include "SDL2/SDL.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-void (*chip8_table[16])(void) = 
+void (*chip8_table[16])() = 
 {
 	cpu_0, cpu_1, cpu_2, cpu_3, cpu_4, cpu_5, cpu_6, cpu_7, 
-	cpu_arithmetic, cpu_9, cpu_a, cpu_b, cpu_c, cpu_d, cpu_e, cpu_f
+	cpu_8, cpu_9, cpu_a, cpu_b, cpu_c, cpu_d, cpu_e, cpu_f
 };
 
-//all opcodes that start with 0 are evaluated here
-void cpu_0(void) {	
-	/*printf("0 - %04x\n", opcode);*/
-	unsigned short tail = opcode & 0x0FFF; 
+//all chip->opcodes that start with 0 are evaluated here
+void cpu_0(struct Chip8 *chip) {	
+	printf("0 - %04x\n", chip->opcode);
+	unsigned short tail = chip->opcode & 0x0FFF; 
+
 	switch(tail) {
 		case 0x00E0: //Clears the screen.
 			for(int i = 0; i < (64 * 32); i++) {
-				gfx[i] = 0;
+				chip->gfx[i] = 0;
 			}
-			draw_flag = 1;
+			chip->draw_flag = 1;
 			break;
 		case 0x00EE: //returns from a subroutine.
-			sp--;
-			pc = stack[sp];
+			chip->sp--;
+			chip->pc = chip->stack[chip->sp];
 			break;
 		default:
 			printf("RCA is not implemented, exiting...\n");
-			//exit(1);
+			/*exit(1);*/
 			break;
 	}
-	pc += 2;
+	chip->pc += 2;
+	//TODO muss das hier sein?
 }
 
 //Jumps to address NNN.
-void cpu_1(void) {
-	printf("1 - %04x\n", opcode);
-	unsigned short NNN = opcode & 0x0FFF;
+void cpu_1(struct Chip8 *chip) {
+	printf("1 - %04x\n", chip->opcode);
+	unsigned short NNN = chip->opcode & 0x0FFF;
 
-	pc = NNN;
+	chip->pc = NNN;
 }
 
 //Calls subroutine at NNN.
-void cpu_2(void) {
-	printf("2 - %04x\n", opcode);
-	unsigned short NNN = opcode & 0x0FFF;
+void cpu_2(struct Chip8 *chip) {
+	printf("2 - %04x\n", chip->opcode);
+	unsigned short NNN = chip->opcode & 0x0FFF;
 
-	stack[sp] = pc;
-	sp++;
-	pc = NNN;
+	chip->stack[chip->sp] = chip->pc;
+	chip->sp++;
+	chip->pc = NNN;
 }
 
-//Skips the next instruction if VX equals NN.
-void cpu_3(void) {
-	printf("3 - %04x\n", opcode);
-	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char NN = opcode & 0x00FF;
+//Skips the next instruction if chip->VX equals NN.
+void cpu_3(struct Chip8 *chip) {
+	printf("3 - %04x\n", chip->opcode);
+	unsigned char x = (chip->opcode & 0x0F00) >> 8;
+	unsigned char NN = chip->opcode & 0x00FF;
 
-	if(V[x] == NN) {
-		pc += 4;
+	if(chip->V[x] == NN) {
+		chip->pc += 4;
 	} else {
-		pc += 2;
+		chip->pc += 2;
 	}
 }
 
-//Skips the next instruction if VX doesn't equal NN.
-void cpu_4(void) {
-	printf("4 - %04x\n", opcode);
-	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char NN = opcode & 0x00FF;
+//Skips the next instruction if chip->VX doesn't equal NN.
+void cpu_4(struct Chip8 *chip) {
+	printf("4 - %04x\n", chip->opcode);
+	unsigned char x = (chip->opcode & 0x0F00) >> 8;
+	unsigned char NN = chip->opcode & 0x00FF;
 
-	if(V[x] != NN) {
-		pc += 4;
+	if(chip->V[x] != NN) {
+		chip->pc += 4;
 	} else {
-		pc += 2;
+		chip->pc += 2;
 	}
 }
 
-//Skips the next instruction if VX equals VY.
-void cpu_5(void) {
-	printf("5 - %04x\n", opcode);
-	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char y = (opcode & 0x00F0) >> 4;
+//Skips the next instruction if chip->VX equals chip->VY.
+void cpu_5(struct Chip8 *chip) {
+	printf("5 - %04x\n", chip->opcode);
+	unsigned char x = (chip->opcode & 0x0F00) >> 8;
+	unsigned char y = (chip->opcode & 0x00F0) >> 4;
 
-	if(V[x] == V[y]) {
-		pc += 4;
+	if(chip->V[x] == chip->V[y]) {
+		chip->pc += 4;
 	} else {
-		pc += 2;
+		chip->pc += 2;
 	}
 }
 
-//Sets VX to NN
-void cpu_6(void) {
-	printf("6 - %04x\n", opcode);
-	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char NN = opcode & 0x00FF;
+//Sets chip->VX to NN
+void cpu_6(struct Chip8 *chip) {
+	printf("6 - %04x\n", chip->opcode);
+	unsigned char x = (chip->opcode & 0x0F00) >> 8;
+	unsigned char NN = chip->opcode & 0x00FF;
 
-	V[x] = NN;
-	pc += 2;
+	chip->V[x] = NN;
+	chip->pc += 2;
 }
 
-//Adds NN to VX. (Carry flag is not changed)
-void cpu_7(void) {
-	printf("7 - %04x\n", opcode);
-	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char NN = opcode & 0x00FF;
+//Adds NN to chip->VX. (Carry flag is not changed)
+void cpu_7(struct Chip8 *chip) {
+	printf("7 - %04x\n", chip->opcode);
+	unsigned char x = (chip->opcode & 0x0F00) >> 8;
+	unsigned char NN = chip->opcode & 0x00FF;
 
-	V[x] += NN;
-	pc += 2;
+	chip->V[x] += NN;
+	chip->pc += 2;
 }
 
-//all opcodes that start with 8 are evaluated here
-void cpu_arithmetic(void) {
-	printf("8 - %04x\n", opcode);
-	int tail = opcode & 0x000F;
-	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char y = (opcode & 0x00F0) >> 4;
+//all chip->opcodes that start with 8 are evaluated here
+void cpu_8(struct Chip8 *chip) {
+	printf("8 - %04x\n", chip->opcode);
+	int tail = chip->opcode & 0x000F;
+	unsigned char x = (chip->opcode & 0x0F00) >> 8;
+	unsigned char y = (chip->opcode & 0x00F0) >> 4;
 
 	switch(tail) {
-		case(0x0000): //Sets VX to the value of VY. 
-			V[x] = V[y];
+		case(0x0000): //Sets chip->VX to the value of chip->VY. 
+			chip->V[x] = chip->V[y];
 			break;
-		case(0x0001): //Sets VX to VX or VY. 
-			V[x] = V[x] | V[y];
+		case(0x0001): //Sets chip->VX to chip->VX or chip->VY. 
+			chip->V[x] = chip->V[x] | chip->V[y];
 			break;
-		case(0x0002): //Sets VX to VX and VY.	
-			V[x] = V[x] & V[y];
+		case(0x0002): //Sets chip->VX to chip->VX and chip->VY.	
+			chip->V[x] = chip->V[x] & chip->V[y];
 			break;
-		case(0x0003): //Sets VX to VX xor VY.
-			V[x] = V[x] ^ V[y];
+		case(0x0003): //Sets chip->VX to chip->VX xor chip->VY.
+			chip->V[x] = chip->V[x] ^ chip->V[y];
 			break;
-		case(0x0004): //Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
-			if(V[y] > (0xFF - V[x])) {
-				V[15] = 1;
-			}	else {
-				V[15] = 0;
-			}
-			V[x] += V[y];
-			break;
-		case(0x0005): //VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-			if(V[y] > V[x]) {
-				V[15] = 0;	
+		case(0x0004): //Adds chip->VY to chip->VX. chip->VF is set to 1 when there's a carry, and to 0 when there isn't.
+			chip->V[x] = chip->V[x] + chip->V[y];
+			if(chip->V[y] > (255 - chip->V[x])) {
+				chip->V[15] = 1;
 			} else {
-				V[15] = 1;
+				chip->V[15] = 0;
 			}
-			V[x] -= V[y];
 			break;
-		case(0x0006): //Shifts VY right by one and copies the result to VX. VF is set to the value of the least significant bit of VY before the shift.
-			V[15] = V[y] & 0x1; //get least significant bit
-			V[x] = V[y] >> 1;
+		case(0x0005): //chip->VY is subtracted from chip->VX. chip->VF is set to 0 when there's a borrow, and 1 when there isn't.
+			if(chip->V[y] > chip->V[x]) {
+				chip->V[15] = 0;
+			}
+			else {
+				chip->V[15] = 1;
+			}
+			chip->V[x] = chip->V[x] - chip->V[y];
 			break;
-		case(0x0007): //Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-			if(V[x] > V[y]) {
-				V[15] = 0;
+		case(0x0006): //Shifts chip->VY right by one and copies the result to chip->VX. chip->VF is set to the value of the least significant bit of chip->VY before the shift.
+			chip->V[15] = chip->V[y] & 0x1; //get least significant bit
+			chip->V[x] = chip->V[y] >> 1;
+			break;
+		case(0x0007): //Sets chip->VX to chip->VY minus chip->VX. chip->VF is set to 0 when there's a borrow, and 1 when there isn't.
+			if(chip->V[x] > chip->V[y]) {
+				chip->V[15] = 0;
 			} else {
-				V[15] = 1;
+				chip->V[15] = 1;
 			}
-			V[x] = V[y] - V[x];
+			chip->V[x] = chip->V[y] - chip->V[x];
 			break;
-		case(0x000E): //Shifts VY left by one and copies the result to VX. VF is set to the value of the most significant bit of VY before the shift 
-			V[15] = (V[y]) >> 3; //get most significant bit
-			V[x] = V[y] << 1;
+		case(0x000E): //Shifts chip->VY left by one and copies the result to chip->VX. chip->VF is set to the value of the most significant bit of chip->VY before the shift 
+			chip->V[15] = chip->V[y] >> 3; //get most significant bit
+			chip->V[x] = chip->V[y] << 1;
 			break;
 	}
-	pc += 2;
+	chip->pc += 2;
 }
 
-//Skips the next instruction if VX doesn't equal VY. 
-void cpu_9(void) {
-	printf("9 - %04x\n", opcode);
-	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char y = (opcode & 0x00F0) >> 4;
+//Skips the next instruction if chip->VX doesn't equal chip->VY. 
+void cpu_9(struct Chip8 *chip) {
+	printf("9 - %04x\n", chip->opcode);
+	unsigned char x = (chip->opcode & 0x0F00) >> 8;
+	unsigned char y = (chip->opcode & 0x00F0) >> 4;
 
-	if(V[x] != V[y]) {
-		pc += 4;
+	if(chip->V[x] != chip->V[y]) {
+		chip->pc += 4;
 	} else {
-		pc += 2;
+		chip->pc += 2;
 	}
 }
 
-//Sets I to the address NNN.
-void cpu_a(void) {
-	printf("10 - %04x\n", opcode);
-	unsigned char NNN = opcode & 0x0FFF;
+//Sets chip->I to the address NNN.
+void cpu_a(struct Chip8 *chip) {
+	printf("10 - %04x\n", chip->opcode);
+	unsigned char NNN = chip->opcode & 0x0FFF;
 
-	I = NNN;
-	pc += 2;
+	chip->I = NNN;
+	chip->pc += 2;
 }
 
-//Jumps to the address NNN plus V0.
-void cpu_b(void) {
-	printf("11 - %04x\n", opcode);
-	unsigned char NNN = opcode & 0x0FFF;
-	pc = NNN + V[0];
+//Jumps to the address NNN plus chip->V0.
+void cpu_b(struct Chip8 *chip) {
+	printf("11 - %04x\n", chip->opcode);
+	unsigned char NNN = chip->opcode & 0x0FFF;
+	chip->pc = NNN + chip->V[0];
 }
 
-//Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
-void cpu_c(void) {
-	printf("12 - %04x\n", opcode);
-	unsigned short x = (opcode & 0x0F00) >> 8;
-	unsigned short NN = opcode & 0x00FF;
+//Sets chip->VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
+void cpu_c(struct Chip8 *chip) {
+	printf("12 - %04x\n", chip->opcode);
+	unsigned short x = (chip->opcode & 0x0F00) >> 8;
+	unsigned short NN = chip->opcode & 0x00FF;
 	unsigned short random_number = rand() % 256;
 
-	V[x] = random_number & NN;	
-	pc += 2;
+	chip->V[x] = random_number & NN;	
+	chip->pc += 2;
 }
 
-/*Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen*/
-void cpu_d(void) {
-	printf("13 - %04x\n", opcode);
-	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char y = (opcode & 0x00F0) >> 4;
-	unsigned char N = opcode & 0x000F;
+/*Draws a chip->sprite at coordinate (chip->VX, chip->VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from chip->memory location chip->I; I value doesn’t change after the execution of this instruction. As described above, chip->VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen*/
+void cpu_d(struct Chip8 *chip) {
+	printf("13 - %04x\n", chip->opcode);
+	unsigned char x = (chip->opcode & 0x0F00) >> 8;
+	unsigned char y = (chip->opcode & 0x00F0) >> 4;
+	unsigned char N = chip->opcode & 0x000F;
 	unsigned short pixel;
 
-	V[15] = 0;
+	chip->V[15] = 0;
 	for (int yline = 0; yline < N; yline++)	{
-		pixel = memory[I + yline];
+		pixel = chip->memory[chip->I + yline];
 		for(int xline = 0; xline < 8; xline++) {
 			if((pixel & (0x80 >> xline)) != 0) {
-				if(gfx[(V[x] + xline + ((V[y] + yline) * 64))] == 1) {
-					V[15] = 1;
+				if(chip->gfx[(chip->V[x] + xline + ((chip->V[y] + yline) * 64))] == 1) {
+					chip->V[15] = 1;
 				}
-				gfx[V[x] + xline + ((V[y] + yline) * 64)] ^= 1;
+				chip->gfx[chip->V[x] + xline + ((chip->V[y] + yline) * 64)] ^= 1;
 			}
 		}
 	}
 
-	draw_flag = 1;
-	pc += 2;
+	chip->draw_flag = 1;
+	chip->pc += 2;
 }
 
-//all opcodes that start with e are evaluated here
-void cpu_e(void) {
-	printf("14 - %04x\n", opcode);
-	unsigned char x = (opcode & 0x0F00) >> 8;
-	unsigned char tail = opcode & 0x00FF;
+//all chip->opcodes that start with e are evaluated here
+void cpu_e(struct Chip8 *chip) {
+	printf("14 - %04x\n", chip->opcode);
+	unsigned char x = (chip->opcode & 0x0F00) >> 8;
+	unsigned char tail = chip->opcode & 0x00FF;
 
 	switch(tail) {
-		case 0x009E: //Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block)
-			if(key[V[x]] != 0) {
-				pc += 4;
+		case 0x009E: //Skips the next instruction if the chip->keys stored in chip->VX is pressed. (Usually the next instruction is a jump to skip a code block)
+			if(chip->keys[chip->V[x]] != 0) {
+				chip->pc += 4;
 			} else {
-				pc += 2;
+				chip->pc += 2;
 			}
 			break;
-		case 0x00A1: //Skips the next instruction if the key stored in VX isn't pressed. (Usually the next instruction is a jump to skip a code block)
-			if(key[V[x]] == 0) {
-				pc += 4;
+		case 0x00A1: //Skips the next instruction if the chip->keys stored in chip->VX isn't pressed. (Usually the next instruction is a jump to skip a code block)
+			if(chip->keys[chip->V[x]] == 0) {
+				chip->pc += 4;
 			}
 			else {
-				pc += 2;
+				chip->pc += 2;
 			}
 			break;
 	}
 }
 
-//all opcodes that start with f are evaluated here
-void cpu_f(void) {
-	printf("15 - %04x\n", opcode);
-	int tail = opcode & 0x00FF;
-	unsigned char x = (opcode & 0x0F00) >> 8; 
+//all chip->opcodes that start with f are evaluated here
+void cpu_f(struct Chip8 *chip) {
+	printf("15 - %04x\n", chip->opcode);
+	int tail = chip->opcode & 0x00FF;
+	unsigned char x = (chip->opcode & 0x0F00) >> 8; 
 	int key_pressed = 0;
 
 	switch(tail) {
-		case 0x0007: //Sets VX to the value of the delay timer.
-			V[x] = delay_timer;
+		case 0x0007: //Sets chip->VX to the value of the delay timer.
+			chip->V[x] = chip->delay_timer;
 			break;
 		case 0x000A:
 			for(int i = 0; i < 16; i++) {
-				if(key[i] != 0) {
-					V[x] = i;
+				if(chip->keys[i] != 0) {
+					chip->V[x] = i;
 					key_pressed = 1;
 				}
 			}
@@ -280,35 +282,35 @@ void cpu_f(void) {
 				return;
 			}
 			break;
-		case 0x0015: //Sets the delay timer to VX.
-			delay_timer = V[x];
+		case 0x0015: //Sets the delay timer to chip->VX.
+			chip->delay_timer = chip->V[x];
 			break;
-		case 0x0018: //Sets the sound timer to VX.
-			sound_timer = V[x];
+		case 0x0018: //Sets the sound timer to chip->VX.
+			chip->sound_timer = chip->V[x];
 			break;
-		case 0x001E: //Adds VX to I.
-			I += V[x];
+		case 0x001E: //Adds chip->VX to chip->I.
+			chip->I += chip->V[x];
 			break;
-		case 0x0029: //Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
-			I = V[x] * 5;
+		case 0x0029: //Sets chip->I to the location of the chip->sprite for the character in chip->VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
+			chip->I = chip->V[x] * 5;
 			break;
 		case 0x0033:
-			memory[I] = V[x] / 100;
-			memory[I + 1] = (V[x] / 10) % 10;
-			memory[I + 2] = V[x] % 10;
+			chip->memory[chip->I] = chip->V[x] / 100;
+			chip->memory[chip->I + 1] = (chip->V[x] / 10) % 10;
+			chip->memory[chip->I + 2] = chip->V[x] % 10;
 			break;
-		case 0x0055: //Stores V0 to VX (including VX) in memory starting at address I. I is increased by 1 for each value written.
+		case 0x0055: //Stores chip->V0 to chip->VX (including chip->VX) in chip->memory starting at address chip->I. I is increased by 1 for each value written.
 			for(int i = 0; i <= x; i++) {
-				memory[I + i] = V[i];
+				chip->memory[chip->I + i] = chip->V[i];
 			}
-			I += x + 1;
+			chip->I += x + 1;
 			break;
-		case 0x0065: //Fills V0 to VX (including VX) with values from memory starting at address I. I is increased by 1 for each value written.
+		case 0x0065: //Fills chip->V0 to chip->VX (including chip->VX) with values from chip->memory starting at address chip->I. I is increased by 1 for each value written.
 			for(int i = 0; i <= x; i++) {
-				V[i] = memory[I + i];
+				chip->V[i] = chip->memory[chip->I + i];
 			}
-			I += x + 1;
+			chip->I += x + 1;
 			break;
 	}
-	pc += 2;
+	chip->pc += 2;
 }
