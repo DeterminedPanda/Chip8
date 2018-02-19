@@ -59,18 +59,13 @@ void load_font(struct Chip8 *chip) {
 }
 
 void load_rom(struct Chip8 *chip) {
-	/*FILE *game = fopen("Pong.ch8", "rb");*/
-	/*unsigned char buffer[MEMORY_SIZE]; //fread into struct delivers wrong output, so copy game into buffer first		*/
-	/*fread(buffer + ROM_SP, 1, MEMORY_SIZE - ROM_SP, game);*/
+	FILE *game = fopen("Pong.ch8", "rb");
+	fread(chip->memory + ROM_SP, 1, MEMORY_SIZE - ROM_SP, game);
 
-	/*for(int i = 0; i < MEMORY_SIZE; i++) {*/
-		/*chip->memory[i] = buffer[i];*/
-	/*}*/
-
-	chip->V[0] = 0;
-	chip->V[1] = 0;
-	chip->memory[0x200 + 0] = 0xD0;
-	chip->memory[0x200 + 1] = 0x15;
+	/*chip->V[0] = 0;*/
+	/*chip->V[1] = 0;*/
+	/*chip->memory[0x200 + 0] = 0xD0;*/
+	/*chip->memory[0x200 + 1] = 0x15;*/
 }
 
 unsigned char keymap[16] = {
