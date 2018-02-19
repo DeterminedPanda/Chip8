@@ -148,9 +148,9 @@ void cpu_8(struct Chip8 *chip) {
 			}
 			chip->V[x] = chip->V[x] - chip->V[y];
 			break;
-		case(0x0006): //Shifts VY right by one and copies the result to VX. VF is set to the value of the least significant bit of VY before the shift.
-			chip->V[15] = chip->V[y] & 0x1; //get least significant bit
-			chip->V[x] = chip->V[y] >> 1;
+		case(0x0006): //Shifts VX right by one and copies the result to VX. VF is set to the value of the least significant bit of VX before the shift.
+			chip->V[15] = chip->V[x] & 0x1; //get least significant bit
+			chip->V[x] = chip->V[x] >> 1;
 			break;
 		case(0x0007): //Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
 			if(chip->V[x] > chip->V[y]) {
@@ -160,9 +160,9 @@ void cpu_8(struct Chip8 *chip) {
 			}
 			chip->V[x] = chip->V[y] - chip->V[x];
 			break;
-		case(0x000E): //Shifts VY left by one and copies the result to VX. VF is set to the value of the most significant bit of VY before the shift 
-			chip->V[15] = chip->V[y] >> 3; //get most significant bit
-			chip->V[x] = chip->V[y] << 1;
+		case(0x000E): //Shifts VX left by one and copies the result to VX. VF is set to the value of the most significant bit of VX before the shift 
+			chip->V[15] = chip->V[x] >> 7; //get most significant bit
+			chip->V[x] = chip->V[x] << 1;
 			break;
 	}
 	chip->pc += 2;
@@ -216,17 +216,27 @@ void cpu_d(struct Chip8 *chip) {
 	unsigned char N = chip->opcode & 0x000F;
 	unsigned short pixel;
 
+	printf("x: %d, y: %d, N: %d, I: %d, V[x]: %02x, V[y]: %02x\n", x, y, N, chip->I, chip->V[x], chip->V[y]);
 	chip->V[15] = 0;
 	for (int yline = 0; yline < N; yline++)	{
 		pixel = chip->memory[chip->I + yline];
+		printf("current: %d\n", chip->memory[chip->I + yline]); 
 		for(int xline = 0; xline < 8; xline++) {
 			if((pixel & (0x80 >> xline)) != 0) {
 				if(chip->gfx[(chip->V[x] + xline + ((chip->V[y] + yline) * 64))] == 1) {
 					chip->V[15] = 1;
 				}
+				printf("we did it reddit xDDDD\n");
 				chip->gfx[chip->V[x] + xline + ((chip->V[y] + yline) * 64)] ^= 1;
 			}
 		}
+	}
+
+	for(int i = 0; i < 64 * 32; i++) {
+			if(i % 64 == 0) {
+				printf("\n");	
+			}
+			printf("%d ", chip->gfx[i]);
 	}
 
 	chip->draw_flag = 1;

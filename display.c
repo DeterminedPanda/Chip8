@@ -20,13 +20,11 @@ void create_window() {
 }
 
 void draw(unsigned char gfx[]) { 
-	printf("drawing\n");
 	unsigned int pixels[W * H];
 
-	for (int i = 0; i < (W * H); ++i) {
-		uint8_t pixel = gfx[i];
+	for (int i = 0; i < (W * H); i++) {
+		unsigned short pixel = gfx[i];
 		pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
-		printf("%08x pixel\n", (0x00FFFFFF * pixel) | 0xFF000000);
 	}
 	SDL_UpdateTexture(texture, NULL, pixels, 64 * sizeof(Uint32));
 	SDL_RenderClear(renderer);

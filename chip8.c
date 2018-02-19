@@ -34,7 +34,7 @@ void start_emulation(void) {
 
 void initialize_chip(struct Chip8 *chip) {
 	chip->pc = ROM_SP;
-	chip->opcode = 0;
+	chip->opcode = ROM_SP;
 	chip->I = 0;
 	chip->sp = 0;
 	chip->delay_timer = 0;
@@ -59,11 +59,15 @@ void load_font(struct Chip8 *chip) {
 }
 
 void load_rom(struct Chip8 *chip) {
-	FILE *game = fopen("Pong.ch8", "rb");
+	FILE *game = fopen("PONG", "rb");
 	fread(chip->memory + ROM_SP, 1, MEMORY_SIZE - ROM_SP, game);
 
-	/*chip->V[0] = 0;*/
-	/*chip->V[1] = 0;*/
+	/*for(int i = 0; i < MEMORY_SIZE; i++) {*/
+		/*printf("%d - %d\n", i, chip->memory[i]);*/
+	/*}*/
+
+	/*chip->V[0] = 0x3f;*/
+	/*chip->V[1] = 0x0c;*/
 	/*chip->memory[0x200 + 0] = 0xD0;*/
 	/*chip->memory[0x200 + 1] = 0x15;*/
 }
@@ -81,7 +85,7 @@ unsigned char keymap[16] = {
 	SDLK_s,
 	SDLK_d,
 	SDLK_f,
-	SDLK_z,
+	SDLK_y,
 	SDLK_x,
 	SDLK_c,
 	SDLK_v
@@ -101,11 +105,11 @@ void emulate_cycle(struct Chip8 *chip) {
 			chip->sound_timer--;
 		}
 
-		// Process SDL events
+		// process sdl events
 		SDL_Event e;
 		while (SDL_PollEvent(&e)) {
 
-			// Process keydown events
+			// process keydown events
 			if (e.type == SDL_KEYDOWN) {
 				if (e.key.keysym.sym == SDLK_ESCAPE)
 					exit(0);
@@ -117,7 +121,7 @@ void emulate_cycle(struct Chip8 *chip) {
 					}
 				}
 			}
-			// Process keyup events
+			// process keyup events
 			if (e.type == SDL_KEYUP) {
 				for (int i = 0; i < 16; ++i) {
 					if (e.key.keysym.sym == keymap[i]) {
@@ -131,6 +135,8 @@ void emulate_cycle(struct Chip8 *chip) {
 			chip->draw_flag = 0;
 			draw(chip->gfx);
 		}
+
+		SDL_Delay(1500);
 	}
 }
 
