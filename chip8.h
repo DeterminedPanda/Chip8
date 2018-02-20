@@ -11,7 +11,7 @@ struct Chip8 {
 	unsigned short sp;
 	unsigned char delay_timer;
 	unsigned char sound_timer;
-	unsigned char gfx[64 * 32];
+	unsigned char gfx[64][32];
 	unsigned int draw_flag;
 	unsigned char keys[16];
 };

@@ -17,8 +17,10 @@ void cpu_0(struct Chip8 *chip) {
 
 	switch(tail) {
 		case 0x00E0: //Clears the screen.
-			for(int i = 0; i < (64 * 32); i++) {
-				chip->gfx[i] = 0;
+			for(int i = 0; i < 32; i++) {
+				for(int j = 0; j < 64; j++) {
+					chip->gfx[i][j] = 0;
+				}
 			}
 			chip->draw_flag = 1;
 			break;
@@ -56,7 +58,7 @@ void cpu_2(struct Chip8 *chip) {
 void cpu_3(struct Chip8 *chip) {
 	printf("3 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
-	unsigned char NN = chip->opcode & 0x00FF;
+	unsigned short NN = chip->opcode & 0x00FF;
 
 	if(chip->V[x] == NN) {
 		chip->pc += 4;
@@ -69,7 +71,7 @@ void cpu_3(struct Chip8 *chip) {
 void cpu_4(struct Chip8 *chip) {
 	printf("4 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
-	unsigned char NN = chip->opcode & 0x00FF;
+	unsigned short NN = chip->opcode & 0x00FF;
 
 	if(chip->V[x] != NN) {
 		chip->pc += 4;
@@ -95,7 +97,7 @@ void cpu_5(struct Chip8 *chip) {
 void cpu_6(struct Chip8 *chip) {
 	printf("6 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
-	unsigned char NN = chip->opcode & 0x00FF;
+	unsigned short NN = chip->opcode & 0x00FF;
 
 	chip->V[x] = NN;
 	chip->pc += 2;
@@ -105,7 +107,7 @@ void cpu_6(struct Chip8 *chip) {
 void cpu_7(struct Chip8 *chip) {
 	printf("7 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
-	unsigned char NN = chip->opcode & 0x00FF;
+	unsigned short NN = chip->opcode & 0x00FF;
 
 	chip->V[x] += NN;
 	chip->pc += 2;
@@ -184,16 +186,17 @@ void cpu_9(struct Chip8 *chip) {
 //Sets I to the address NNN.
 void cpu_a(struct Chip8 *chip) {
 	printf("10 - %04x\n", chip->opcode);
-	unsigned char NNN = chip->opcode & 0x0FFF;
+	unsigned short NNN = chip->opcode & 0x0FFF;
 
 	chip->I = NNN;
+	printf("%d - %04x, actual: %04x, I now: %d \n", NNN, NNN, chip->opcode & 0x0FFF, chip->I);
 	chip->pc += 2;
 }
 
 //Jumps to the address NNN plus V0.
 void cpu_b(struct Chip8 *chip) {
 	printf("11 - %04x\n", chip->opcode);
-	unsigned char NNN = chip->opcode & 0x0FFF;
+	unsigned short NNN = chip->opcode & 0x0FFF;
 	chip->pc = NNN + chip->V[0];
 }
 
@@ -216,28 +219,46 @@ void cpu_d(struct Chip8 *chip) {
 	unsigned char N = chip->opcode & 0x000F;
 	unsigned short pixel;
 
-	printf("x: %d, y: %d, N: %d, I: %d, V[x]: %02x, V[y]: %02x\n", x, y, N, chip->I, chip->V[x], chip->V[y]);
+	printf("x: %d, y: %d, N: %d, I: %d, V[x]: %02x, V[y]: %02x, memory[I]: %d\n", x, y, N, chip->I, chip->V[x], chip->V[y], chip->memory[chip->I]);
 	chip->V[15] = 0;
-	for (int yline = 0; yline < N; yline++)	{
-		pixel = chip->memory[chip->I + yline];
-		printf("current: %d\n", chip->memory[chip->I + yline]); 
-		for(int xline = 0; xline < 8; xline++) {
-			if((pixel & (0x80 >> xline)) != 0) {
-				if(chip->gfx[(chip->V[x] + xline + ((chip->V[y] + yline) * 64))] == 1) {
+	/*for (int yline = 0; yline < N; yline++)	{*/
+		/*pixel = chip->memory[chip->I + yline];*/
+		/*printf("current: %d\n", chip->memory[chip->I + yline]); */
+		/*for(int xline = 0; xline < 8; xline++) {*/
+			/*if((pixel & (0x80 >> xline)) != 0) {*/
+				/*if(chip->gfx[(chip->V[x] + xline + ((chip->V[y] + yline) * 64))] == 1) {*/
+					/*chip->V[15] = 1;*/
+				/*}*/
+				/*printf("we did it reddit xDDDD\n");*/
+				/*chip->gfx[chip->V[x] + xline + ((chip->V[y] + yline) * 64)] ^= 1;*/
+			/*}*/
+		/*}*/
+	/*}*/
+
+	for(int i = 0; i < N; i++) {
+		pixel = chip->memory[chip->I + i];
+		for(int j = 0; j < 8; j++) {
+			if((pixel & (0x80 >> j)) != 0) {
+				if(chip->gfx[chip->V[x] + j][chip->V[y] + i] == 1) {
 					chip->V[15] = 1;
 				}
-				printf("we did it reddit xDDDD\n");
-				chip->gfx[chip->V[x] + xline + ((chip->V[y] + yline) * 64)] ^= 1;
+				printf("placing that shit at V[x] + j: %d, V[y] + i: %d, V[x]: %d, j: %d, V[y]: %d, y: %d\n", chip->V[x] + j, chip->V[y] + i, chip->V[x], j, chip->V[y], i);
+				chip->gfx[chip->V[x] + j][chip->V[y] + i] ^= 1;
 			}
 		}
 	}
 
-	for(int i = 0; i < 64 * 32; i++) {
-			if(i % 64 == 0) {
-				printf("\n");	
+	for(int i = 0; i < 32; i++) {
+		for(int j = 0; j < 64; j++) {
+			if(chip->gfx[j][i] == 1) {
+				printf("X ");	
+			} else {
+				printf("%d ", chip->gfx[j][i]);
 			}
-			printf("%d ", chip->gfx[i]);
+		}
+		printf("\n");
 	}
+	printf("donezo\n");
 
 	chip->draw_flag = 1;
 	chip->pc += 2;

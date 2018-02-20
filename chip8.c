@@ -41,8 +41,10 @@ void initialize_chip(struct Chip8 *chip) {
 	chip->sound_timer = 0;
 	chip->draw_flag = 0;
 
-	for(int i = 0; i < (64 * 32); i++) {
-		chip->gfx[i] = 0;
+	for(int i = 0; i < 32; i++) {
+		for(int j = 0; j < 64; j++) {
+			chip->gfx[j][i] = 0;
+		}
 	}
 
 	for(int i = 0; i < 16; i++) {
@@ -63,7 +65,7 @@ void load_rom(struct Chip8 *chip) {
 	fread(chip->memory + ROM_SP, 1, MEMORY_SIZE - ROM_SP, game);
 
 	/*for(int i = 0; i < MEMORY_SIZE; i++) {*/
-		/*printf("%d - %d\n", i, chip->memory[i]);*/
+	/*printf("%d - %d\n", i, chip->memory[i]);*/
 	/*}*/
 
 	/*chip->V[0] = 0x3f;*/
