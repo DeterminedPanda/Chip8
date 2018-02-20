@@ -51,7 +51,7 @@ void load_font(struct Chip8 *chip) {
 }
 
 void load_rom(struct Chip8 *chip) {
-	FILE *game = fopen("PONG", "rb");
+	FILE *game = fopen("src/PONG", "rb");
 	fread(chip->memory + ROM_SP, 1, MEMORY_SIZE - ROM_SP, game);
 }
 
