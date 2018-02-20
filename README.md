@@ -28,7 +28,7 @@ Run the programm:
 
 done.
 
-# Chip8
+# Online Resources
 [https://en.wikipedia.org/wiki/CHIP-8]
 
 [http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/]
