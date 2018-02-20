@@ -4,9 +4,11 @@ This repository contains a Chip8 emulator that is writtein in C.
 
 ![emulator in action](Emulator.png)
 
+
 # Required Libraries
 
 To use this repository you need to have the `SDL2` library installed.
+
 
 # How to use this Repository
 
@@ -27,6 +29,7 @@ Run the programm:
 `./emulator`
 
 done.
+
 
 # Online Resources
 [https://en.wikipedia.org/wiki/CHIP-8]
