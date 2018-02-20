@@ -19,20 +19,11 @@ void create_window() {
 	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, W, H);
 }
 
-void draw(unsigned char gfx[64][32]) { 
+void draw(unsigned char gfx[]) { 
 	unsigned int pixels[W * H];
 
-	/*unsigned int pixels[64][32];*/
-
-	/*for(int i = 0; i < 32; i++) {*/
-		/*for(int j = 0; j < 64; j++) {*/
-			/*unsigned short pixel = gfx[j][i];*/
-			/*pixels[j][i] = (0x00FFFFFF * pixel) | 0xFF000000;*/
-		/*}*/
-	/*}*/
-
 	for (int i = 0; i < (W * H); i++) {
-		unsigned short pixel = gfx[i][i];
+		unsigned short pixel = gfx[i];
 		pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
 	}
 	SDL_UpdateTexture(texture, NULL, pixels, 64 * sizeof(Uint32));

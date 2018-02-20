@@ -3,7 +3,6 @@
 #include "display.h"
 #include <unistd.h>
 
-
 unsigned char chip8_fontset[80] =
 { 
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -41,37 +40,19 @@ void initialize_chip(struct Chip8 *chip) {
 	chip->sound_timer = 0;
 	chip->draw_flag = 0;
 
-	for(int i = 0; i < 32; i++) {
-		for(int j = 0; j < 64; j++) {
-			chip->gfx[j][i] = 0;
-		}
-	}
-
-	for(int i = 0; i < 16; i++) {
-		chip->V[i] = 0;
-		chip->stack[i] = 0;
-		chip->keys[i] = 0;
-	}
+	memset(chip->gfx, 0, (64 * 32));
+	memset(chip->V, 0, 16);
+	memset(chip->stack, 0, 16);
+	memset(chip->keys, 0, 16);
 }
 
 void load_font(struct Chip8 *chip) {
-	for(int i = 0; i < 80; ++i) {
-		chip->memory[i] = chip8_fontset[i]; 
-	}
+	memcpy(chip->memory, chip8_fontset, 80);
 }
 
 void load_rom(struct Chip8 *chip) {
 	FILE *game = fopen("PONG", "rb");
 	fread(chip->memory + ROM_SP, 1, MEMORY_SIZE - ROM_SP, game);
-
-	/*for(int i = 0; i < MEMORY_SIZE; i++) {*/
-	/*printf("%d - %d\n", i, chip->memory[i]);*/
-	/*}*/
-
-	/*chip->V[0] = 0x3f;*/
-	/*chip->V[1] = 0x0c;*/
-	/*chip->memory[0x200 + 0] = 0xD0;*/
-	/*chip->memory[0x200 + 1] = 0x15;*/
 }
 
 unsigned char keymap[16] = {
@@ -93,6 +74,9 @@ unsigned char keymap[16] = {
 	SDLK_v
 };
 
+void fetch_opcode(struct Chip8 *chip) {
+	chip->opcode = chip->memory[chip->pc] << 8 | chip->memory[chip->pc + 1];
+}
 
 void emulate_cycle(struct Chip8 *chip) {
 	while(1) {
@@ -107,14 +91,15 @@ void emulate_cycle(struct Chip8 *chip) {
 			chip->sound_timer--;
 		}
 
-		// process sdl events
+		//SDL2 events
 		SDL_Event e;
 		while (SDL_PollEvent(&e)) {
 
-			// process keydown events
+			//keydown events
 			if (e.type == SDL_KEYDOWN) {
-				if (e.key.keysym.sym == SDLK_ESCAPE)
+				if (e.key.keysym.sym == SDLK_ESCAPE) {
 					exit(0);
+				}
 
 
 				for (int i = 0; i < 16; ++i) {
@@ -123,7 +108,8 @@ void emulate_cycle(struct Chip8 *chip) {
 					}
 				}
 			}
-			// process keyup events
+
+			//keyup events
 			if (e.type == SDL_KEYUP) {
 				for (int i = 0; i < 16; ++i) {
 					if (e.key.keysym.sym == keymap[i]) {
@@ -138,10 +124,6 @@ void emulate_cycle(struct Chip8 *chip) {
 			draw(chip->gfx);
 		}
 
-		SDL_Delay(1500);
+		SDL_Delay(5);
 	}
-}
-
-void fetch_opcode(struct Chip8 *chip) {
-	chip->opcode = chip->memory[chip->pc] << 8 | chip->memory[chip->pc + 1];
 }

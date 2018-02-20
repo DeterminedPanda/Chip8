@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//this function array takes a opcode that is bit shifted right by 12 and returns the corresponding function
 void (*chip8_table[16])() = 
 {
 	cpu_0, cpu_1, cpu_2, cpu_3, cpu_4, cpu_5, cpu_6, cpu_7, 
@@ -17,10 +18,8 @@ void cpu_0(struct Chip8 *chip) {
 
 	switch(tail) {
 		case 0x00E0: //Clears the screen.
-			for(int i = 0; i < 32; i++) {
-				for(int j = 0; j < 64; j++) {
-					chip->gfx[i][j] = 0;
-				}
+			for(int i = 0; i < (64 * 32); i++) {
+					chip->gfx[i] = 0;
 			}
 			chip->draw_flag = 1;
 			break;
@@ -29,8 +28,7 @@ void cpu_0(struct Chip8 *chip) {
 			chip->pc = chip->stack[chip->sp];
 			break;
 		default:
-			printf("RCA is not implemented, exiting...\n");
-			/*exit(1);*/
+			printf("Warning - RCA is not implemented...\n");
 			break;
 	}
 	chip->pc += 2;
@@ -189,7 +187,6 @@ void cpu_a(struct Chip8 *chip) {
 	unsigned short NNN = chip->opcode & 0x0FFF;
 
 	chip->I = NNN;
-	printf("%d - %04x, actual: %04x, I now: %d \n", NNN, NNN, chip->opcode & 0x0FFF, chip->I);
 	chip->pc += 2;
 }
 
@@ -197,6 +194,7 @@ void cpu_a(struct Chip8 *chip) {
 void cpu_b(struct Chip8 *chip) {
 	printf("11 - %04x\n", chip->opcode);
 	unsigned short NNN = chip->opcode & 0x0FFF;
+
 	chip->pc = NNN + chip->V[0];
 }
 
@@ -219,46 +217,18 @@ void cpu_d(struct Chip8 *chip) {
 	unsigned char N = chip->opcode & 0x000F;
 	unsigned short pixel;
 
-	printf("x: %d, y: %d, N: %d, I: %d, V[x]: %02x, V[y]: %02x, memory[I]: %d\n", x, y, N, chip->I, chip->V[x], chip->V[y], chip->memory[chip->I]);
 	chip->V[15] = 0;
-	/*for (int yline = 0; yline < N; yline++)	{*/
-		/*pixel = chip->memory[chip->I + yline];*/
-		/*printf("current: %d\n", chip->memory[chip->I + yline]); */
-		/*for(int xline = 0; xline < 8; xline++) {*/
-			/*if((pixel & (0x80 >> xline)) != 0) {*/
-				/*if(chip->gfx[(chip->V[x] + xline + ((chip->V[y] + yline) * 64))] == 1) {*/
-					/*chip->V[15] = 1;*/
-				/*}*/
-				/*printf("we did it reddit xDDDD\n");*/
-				/*chip->gfx[chip->V[x] + xline + ((chip->V[y] + yline) * 64)] ^= 1;*/
-			/*}*/
-		/*}*/
-	/*}*/
-
-	for(int i = 0; i < N; i++) {
-		pixel = chip->memory[chip->I + i];
-		for(int j = 0; j < 8; j++) {
-			if((pixel & (0x80 >> j)) != 0) {
-				if(chip->gfx[chip->V[x] + j][chip->V[y] + i] == 1) {
+	for (int yline = 0; yline < N; yline++)	{
+		pixel = chip->memory[chip->I + yline];
+		for(int xline = 0; xline < 8; xline++) {
+			if((pixel & (0x80 >> xline)) != 0) {
+				if(chip->gfx[(chip->V[x] + xline + ((chip->V[y] + yline) * 64))] == 1) {
 					chip->V[15] = 1;
 				}
-				printf("placing that shit at V[x] + j: %d, V[y] + i: %d, V[x]: %d, j: %d, V[y]: %d, y: %d\n", chip->V[x] + j, chip->V[y] + i, chip->V[x], j, chip->V[y], i);
-				chip->gfx[chip->V[x] + j][chip->V[y] + i] ^= 1;
+				chip->gfx[chip->V[x] + xline + ((chip->V[y] + yline) * 64)] ^= 1;
 			}
 		}
 	}
-
-	for(int i = 0; i < 32; i++) {
-		for(int j = 0; j < 64; j++) {
-			if(chip->gfx[j][i] == 1) {
-				printf("X ");	
-			} else {
-				printf("%d ", chip->gfx[j][i]);
-			}
-		}
-		printf("\n");
-	}
-	printf("donezo\n");
 
 	chip->draw_flag = 1;
 	chip->pc += 2;
@@ -308,7 +278,7 @@ void cpu_f(struct Chip8 *chip) {
 				}
 			}
 			if(!key_pressed) {
-				printf("rewind...\n");
+				printf("no key pressed...\n");
 				return;
 			}
 			break;
