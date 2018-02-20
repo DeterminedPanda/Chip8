@@ -6,5 +6,6 @@ int main(void) {
 	create_window();
 	start_emulation();	
 	destroy_window();
+
 	return 0;
 }	

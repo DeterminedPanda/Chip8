@@ -1,6 +1,7 @@
 #include "chip8.h"
 
 void (*chip8_table[16])();
+
 void cpu_0(struct Chip8 *chip);
 void cpu_1(struct Chip8 *chip);
 void cpu_2(struct Chip8 *chip);
