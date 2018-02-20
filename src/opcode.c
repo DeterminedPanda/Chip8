@@ -1,3 +1,5 @@
+//function comments are from https://en.wikipedia.org/wiki/CHIP-8
+
 #include "opcode.h"
 #include "display.h"
 #include "SDL2/SDL.h"
