@@ -16,7 +16,7 @@ struct Chip8 {
 	unsigned char keys[16];
 };
 
-void start_emulation(void);
+void initialize_emulation(struct Chip8 *chip);
 void initialize_chip(struct Chip8 *chip);
 void load_font(struct Chip8 *chip);
 void load_rom(struct Chip8 *chip);	

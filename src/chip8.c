@@ -23,12 +23,10 @@ unsigned char chip8_fontset[80] =
 	0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-void start_emulation(void) {
-	struct Chip8 chip;
-	initialize_chip(&chip);
-	load_font(&chip);
-	load_rom(&chip);
-	emulate_cycle(&chip);	
+void initialize_emulation(struct Chip8 *chip) {
+	initialize_chip(chip);
+	load_font(chip);
+	load_rom(chip);
 }
 
 void initialize_chip(struct Chip8 *chip) {

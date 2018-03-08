@@ -3,8 +3,10 @@
 #include <stdio.h>
 
 int main(void) {
+	struct Chip8 chip;
+	initialize_emulation(&chip);	
 	create_window();
-	start_emulation();	
+	emulate_cycle(&chip);
 	destroy_window();
 
 	return 0;
