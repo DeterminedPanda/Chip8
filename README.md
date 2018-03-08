@@ -2,11 +2,11 @@
 
 This repository contains a Chip8 emulator that is writte in in C.
 
-![emulator in action](Emulator.png)
+![emulator in action](images/Emulator.png)
 
 # Why?
 
-Wanted to learn C.
+Wanted to learn C, its my first projet in that language, so the code is trash.
 
 # Required Libraries
 
