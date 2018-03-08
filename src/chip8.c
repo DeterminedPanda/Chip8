@@ -51,7 +51,13 @@ void load_font(struct Chip8 *chip) {
 }
 
 void load_rom(struct Chip8 *chip) {
-	FILE *game = fopen("src/PONG", "rb");
+	printf("What game do you want to play?.\n");
+	char game_name[20];
+	fgets(game_name, 20, stdin);
+	game_name[strcspn(game_name, "\n")] = 0;
+	char folder[] = "games/"; 
+	strcat(folder, game_name);
+	FILE *game = fopen(folder, "rb");
 	fread(chip->memory + ROM_SP, 1, MEMORY_SIZE - ROM_SP, game);
 }
 

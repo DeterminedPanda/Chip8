@@ -15,7 +15,6 @@ void (*chip8_table[16])() =
 
 //all opcodes that start with 0 are evaluated here
 void cpu_0(struct Chip8 *chip) {	
-	printf("0 - %04x\n", chip->opcode);
 	unsigned short tail = chip->opcode & 0x0FFF; 
 
 	switch(tail) {
@@ -38,7 +37,6 @@ void cpu_0(struct Chip8 *chip) {
 
 //Jumps to address NNN.
 void cpu_1(struct Chip8 *chip) {
-	printf("1 - %04x\n", chip->opcode);
 	unsigned short NNN = chip->opcode & 0x0FFF;
 
 	chip->pc = NNN;
@@ -46,7 +44,6 @@ void cpu_1(struct Chip8 *chip) {
 
 //Calls subroutine at NNN.
 void cpu_2(struct Chip8 *chip) {
-	printf("2 - %04x\n", chip->opcode);
 	unsigned short NNN = chip->opcode & 0x0FFF;
 
 	chip->stack[chip->sp] = chip->pc;
@@ -56,7 +53,6 @@ void cpu_2(struct Chip8 *chip) {
 
 //Skips the next instruction if VX equals NN.
 void cpu_3(struct Chip8 *chip) {
-	printf("3 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
 	unsigned short NN = chip->opcode & 0x00FF;
 
@@ -69,7 +65,6 @@ void cpu_3(struct Chip8 *chip) {
 
 //Skips the next instruction if VX doesn't equal NN.
 void cpu_4(struct Chip8 *chip) {
-	printf("4 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
 	unsigned short NN = chip->opcode & 0x00FF;
 
@@ -82,7 +77,6 @@ void cpu_4(struct Chip8 *chip) {
 
 //Skips the next instruction if VX equals VY.
 void cpu_5(struct Chip8 *chip) {
-	printf("5 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
 	unsigned char y = (chip->opcode & 0x00F0) >> 4;
 
@@ -95,7 +89,6 @@ void cpu_5(struct Chip8 *chip) {
 
 //Sets VX to NN
 void cpu_6(struct Chip8 *chip) {
-	printf("6 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
 	unsigned short NN = chip->opcode & 0x00FF;
 
@@ -105,7 +98,6 @@ void cpu_6(struct Chip8 *chip) {
 
 //Adds NN to VX. (Carry flag is not changed)
 void cpu_7(struct Chip8 *chip) {
-	printf("7 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
 	unsigned short NN = chip->opcode & 0x00FF;
 
@@ -115,7 +107,6 @@ void cpu_7(struct Chip8 *chip) {
 
 //all opcodes that start with 8 are evaluated here
 void cpu_8(struct Chip8 *chip) {
-	printf("8 - %04x\n", chip->opcode);
 	int tail = chip->opcode & 0x000F;
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
 	unsigned char y = (chip->opcode & 0x00F0) >> 4;
@@ -172,7 +163,6 @@ void cpu_8(struct Chip8 *chip) {
 
 //Skips the next instruction if VX doesn't equal VY. 
 void cpu_9(struct Chip8 *chip) {
-	printf("9 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
 	unsigned char y = (chip->opcode & 0x00F0) >> 4;
 
@@ -185,7 +175,6 @@ void cpu_9(struct Chip8 *chip) {
 
 //Sets I to the address NNN.
 void cpu_a(struct Chip8 *chip) {
-	printf("10 - %04x\n", chip->opcode);
 	unsigned short NNN = chip->opcode & 0x0FFF;
 
 	chip->I = NNN;
@@ -194,7 +183,6 @@ void cpu_a(struct Chip8 *chip) {
 
 //Jumps to the address NNN plus V0.
 void cpu_b(struct Chip8 *chip) {
-	printf("11 - %04x\n", chip->opcode);
 	unsigned short NNN = chip->opcode & 0x0FFF;
 
 	chip->pc = NNN + chip->V[0];
@@ -202,7 +190,6 @@ void cpu_b(struct Chip8 *chip) {
 
 //Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
 void cpu_c(struct Chip8 *chip) {
-	printf("12 - %04x\n", chip->opcode);
 	unsigned short x = (chip->opcode & 0x0F00) >> 8;
 	unsigned short NN = chip->opcode & 0x00FF;
 	unsigned short random_number = rand() % 255;
@@ -213,7 +200,6 @@ void cpu_c(struct Chip8 *chip) {
 
 /*Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen*/
 void cpu_d(struct Chip8 *chip) {
-	printf("13 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
 	unsigned char y = (chip->opcode & 0x00F0) >> 4;
 	unsigned char N = chip->opcode & 0x000F;
@@ -238,7 +224,6 @@ void cpu_d(struct Chip8 *chip) {
 
 //all opcodes that start with e are evaluated here
 void cpu_e(struct Chip8 *chip) {
-	printf("14 - %04x\n", chip->opcode);
 	unsigned char x = (chip->opcode & 0x0F00) >> 8;
 	unsigned char tail = chip->opcode & 0x00FF;
 
@@ -263,7 +248,6 @@ void cpu_e(struct Chip8 *chip) {
 
 //all opcodes that start with f are evaluated here
 void cpu_f(struct Chip8 *chip) {
-	printf("15 - %04x\n", chip->opcode);
 	int tail = chip->opcode & 0x00FF;
 	unsigned char x = (chip->opcode & 0x0F00) >> 8; 
 	int key_pressed = 0;
@@ -280,7 +264,6 @@ void cpu_f(struct Chip8 *chip) {
 				}
 			}
 			if(!key_pressed) {
-				printf("no key pressed...\n");
 				return;
 			}
 			break;
