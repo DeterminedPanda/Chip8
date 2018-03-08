@@ -2,7 +2,7 @@
 
 This repository contains a Chip8 emulator that is writte in in C.
 
-![emulator in action](Emulator.png)
+![emulator in action](images/Emulator.png)
 
 # Why?
 
