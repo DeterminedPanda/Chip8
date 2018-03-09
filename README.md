@@ -21,7 +21,7 @@ First clone this repository:
 
 Then change your working directory into the repository:
 
-`[you@machine]$ d Chip8/`
+`[you@machine]$ cd Chip8/`
 
 Compile the repository:
 
