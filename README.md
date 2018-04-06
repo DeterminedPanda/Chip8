@@ -6,7 +6,6 @@ This repository contains a Chip8 emulator, that is written in C.
 
 # Why?
 
-Wanted to learn C, its my first project in that language, so the code is probably trash.
 I wanted to learn C and was interested in emulators, so I thought this would be a neat little project.
 Keep in mind that this is my first project in C, so the code is probably ~~shit~~ improvable
 
