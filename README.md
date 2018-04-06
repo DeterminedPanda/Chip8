@@ -7,6 +7,8 @@ This repository contains a Chip8 emulator that is written in C.
 # Why?
 
 Wanted to learn C, its my first project in that language, so the code is probably trash.
+I wanted to learn C and was interested in emulators, so I thought this would be a neat little project.
+Keep in mind that this is my first project in C, so the code is probably ~~shit~~ improvable
 
 # Required Libraries
 
@@ -15,19 +17,19 @@ To use this repository you need to have the `SDL2` library installed.
 
 # How to use this Repository
 
-First clone this repository:
+first you need to clone this repository:
 
 `[you@machine]$ git clone https://github.com/DeterminedPanda/Chip8`
 
-Then change your working directory into the repository:
+then change your current working directory to the newly cloned repository:
 
 `[you@machine]$ cd Chip8/`
 
-Compile the repository:
+after that you need to compile this project:
 
 `[you@machine]$ make`
 
-Run the programm:
+now you can run the program:
 
 `[you@machine]$ ./emulator`
 
