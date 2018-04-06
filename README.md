@@ -1,6 +1,6 @@
 # Chip8
 
-This repository contains a Chip8 emulator that is written in C.
+This repository contains a Chip8 emulator, that is written in C.
 
 ![emulator in action](images/Emulator.png)
 
