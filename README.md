@@ -5,7 +5,7 @@
 # Why?
 
 I wanted to learn C and was interested in emulators, so I thought this would be a neat little project.
-Keep in mind that this is my first project in C, so the code is probably ~~shit~~ improvable
+Keep in mind that this is my first project in C, so the code is probably improvable
 
 # Required Libraries
 
